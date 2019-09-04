@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jsoj.app.jsoj.dao.RecordDao">
+
+    <resultMap id="BaseResultMap" type="Record">
+        <id column="recordid" property="id" />
+        <result column="code" property="code" />
+        <result column="ilike" property="ilike" />
+        <association property="question" javaType="Question">
+            <id column="questionid" property="id"/>
+            <result column="questiontitle" property="title"/>
+        </association>
+        <association property="user" javaType="User">
+            <id column="userid" property="id"/>
+            <result column="userniconame" property="niconame"/>
+            <result column="userniconame" property="niconame"/>
+        </association>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,que_id,user_id,code,ilike
+    </sql>
+
+    <select id="getRecordById" resultMap="BaseResultMap">
+        select record.id as recordid,record.code,record.ilike,user.id as userid,user.niconame as userniconame,question.id as questionid,question.title as questiontitle
+        from record RIGHT join user on record.user_id = user.id RIGHT JOIN question ON record.que_id = question.id
+        WHERE record.user_id =  #{id}  ORDER BY recordid DESC LIMIT 0,50
+    </select>
+
+    <insert id="saveRecord" parameterType="Record">
+        insert into record (id,que_id,user_id,code,ilike) VALUES (#{id},#{question.id},#{user.id},#{code},#{ilike})
+    </insert>
+
+    <select id="getRecordCountByUserId" resultType="int">
+        select count(record.id) from record left join user ON record.user_id = user .id WHERE user.id = #{user.id}
+    </select>
+</mapper>

@@ -1,0 +1,62 @@
+<html><head>
+    <meta charset="utf-8">
+    <title>后台登录</title>
+    <meta name="author" content="DeathGhost">
+    <link rel="stylesheet" type="text/css" href="https://www.17sucai.com/preview/2/2016-07-26/jQuery-VerificationCode/css/style.css" tppabs="css/style.css">
+    <style>
+        body{height:100%;background:#303133;overflow:hidden;}
+        canvas{z-index:-1;position:absolute;}
+        .admin_login dd .login_txtbx{
+            height: 100%;
+            width: 100%;
+        }
+        .admin_login{
+            box-shadow: none;
+        }
+    </style>
+    <script src="https://www.17sucai.com/preview/2/2016-07-26/jQuery-VerificationCode/js/jquery.js"></script>
+    <script src="https://www.17sucai.com/preview/2/2016-07-26/jQuery-VerificationCode/js/verificationNumbers.js" tppabs="js/verificationNumbers.js"></script>
+    <script src="https://www.17sucai.com/preview/2/2016-07-26/jQuery-VerificationCode/js/Particleground.js" tppabs="js/Particleground.js"></script>
+    <script>
+        $(document).ready(function() {
+            //粒子背景特效
+            $('body').particleground({
+                dotColor: '#5cbdaa',
+                lineColor: '#5cbdaa'
+            });
+
+        });
+    </script>
+</head>
+<body><canvas class="pg-canvas" width="622" height="792"></canvas>
+<dl class="admin_login">
+    <dt>
+        <strong>注册用户</strong>
+        <em th:if="(${msg}!='用户名已存在')">Management System</em>
+        <em th:if="(${msg}=='用户名已存在')"><span style="color: red;">用户名已存在</span></em>
+    </dt>
+    <form method="post" action="/api/reg">
+        <dd class="">
+            <input type="text" name="username" placeholder="账号" class="login_txtbx">
+        </dd>
+        <dd class="">
+            <input type="password" name="password" placeholder="密码" class="login_txtbx">
+        </dd>
+        <dd class="">
+            <input type="text" name="niconame" placeholder="昵称" class="login_txtbx">
+        </dd>
+        <dd class="">
+            <input type="email" name="email" placeholder="邮箱" class="login_txtbx">
+        </dd>
+        <dd>
+            <input type="submit" value="立即注册" class="submit_btn">
+        </dd>
+    </form>
+    <dd>
+        <p>© 2019 JSOJ 术与道 版权所有</p>
+        <p>JSOJ</p>
+    </dd>
+</dl>
+
+
+</body></html>

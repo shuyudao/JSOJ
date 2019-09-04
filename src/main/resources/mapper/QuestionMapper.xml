@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jsoj.app.jsoj.dao.QuestionDao">
+
+    <resultMap id="BaseResultMap" type="Question">
+        <result column="id" property="id" />
+        <result column="status" property="status" />
+        <result column="title" property="title" />
+        <result column="description" property="description" />
+        <result column="score" property="score" />
+        <result column="test" property="test" />
+        <result column="questionInit" property="questionInit" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+		id, status, title, description, score, test, questionInit
+	</sql>
+
+
+    <select id="getRandomQuestion" resultType="Question">
+        SELECT <include refid="Base_Column_List"/> FROM question ORDER BY RAND() LIMIT 1
+    </select>
+
+    <select id="getQuestionById" resultType="Question" parameterType="String">
+        select
+        <include refid="Base_Column_List"/>
+        FROM question WHERE id = #{id}
+    </select>
+
+    <insert id="saveQuestion" parameterType="Question">
+        insert into question (id,title,description,score,test,questionInit) VALUES
+        (#{id},#{title},#{description},#{score},#{test},#{questionInit})
+    </insert>
+
+</mapper>

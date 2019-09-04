@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>JSOJ</title>
+  <link rel="stylesheet" href="/codemirror/lib/codemirror.css"/>
+  <link rel="stylesheet" type="text/css" href="/codemirror/theme/monokai.css">
+  <link rel="stylesheet" type="text/css" href="/codemirror/addon/hint/show-hint.css">
+  <link rel="stylesheet" type="text/css" href="/codemirror/addon/display/fullscreen.css">
+  <link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="/font/OxygenMono.css">
+  <script th:src="@{/codemirror/lib/codemirror.js}"></script>
+  <script th:src="@{/codemirror/addon/hint/show-hint.js}"></script>
+
+  <style type="text/css">
+
+    @font-face{
+         font-family: 'orggee'; 
+         src: url('/font/OxygenMono-Regular.ttf');
+    }
+
+    *{
+      margin: 0px;
+      padding: 0px;
+      font-family: 'orggee','微软雅黑';
+    }
+    html,body{
+      height: 100%;
+    }
+    body{
+      background-color: #303133;
+    }
+    
+    .CodeMirror-scroll{
+      font-size: 20px!important;
+      font-family: 'orggee','微软雅黑';
+    }
+
+    #header{
+      width: 100%;
+      height: 60px;
+      background: #1f2020;
+      line-height: 40px;
+    }
+    #header h1{
+      color: rgb(188, 205, 211);
+    }
+    a{
+      color: rgb(188, 205, 211);
+      text-decoration: none;
+      font-size: 32px;
+    }
+
+    #question,#text_code{
+      width: 90%;
+      height: auto;
+      background: #1f2020;
+      margin: 20px auto;
+    }
+    #question{
+      overflow-y: scroll;
+      position: relative;
+    }
+    #question::-webkit-scrollbar {
+      display: none;
+    }
+    body::-webkit-scrollbar {
+      display: none;
+    }
+    .cm-s-monokai.CodeMirror{
+      height: 500px!important;
+    }
+    #question{
+      padding: 20px;
+    }
+    #qs_title{
+      width: 100%;
+      height: 30px;
+      font-size: 24px;
+      color: rgb(188, 205, 211);
+      line-height: 15px;
+      border-bottom:1px solid #313131;
+    }
+
+    #des{
+      color: rgb(188, 205, 211);
+      font-size: 20px;
+      height: auto;
+      padding-top: 5px;
+    }
+  </style>
+</head>
+<body>
+<div id="header">
+  <h1 align="center" style="line-height: 58px;height: 60px;margin: 0px;"><a href="/">JSOJ</a></h1>
+  <a href="/logout" style="display: block;width: 70px;font-size: 16px;height: 30px;text-align: center;line-height: 30px;background:#777777;color: #fff;position: absolute;right: 30px;top: 10px;">退出</a>
+</div>
+<div id="question">
+  <!--/*@thymesVar id="question" type="com.jsoj.app.jsoj.domain.Question"*/-->
+  <div id="qs_title" th:text="'QUESTION：'+${question.title}"></div>
+  <div id="des">
+  </div>
+  <div id="run" style="background: #303133;cursor: pointer;width: 70px;height: 30px;text-align: center;line-height: 30px;color: rgb(188, 205, 211);position: absolute;right: 20px;top: 10px;">提交</div>
+</div>
+
+<div id="text_code">
+  <textarea class="form-control" id="code" name="code"></textarea>
+</div>
+</body>
+</html>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script src="/codemirror/lib/codemirror.js"></script>
+<script src="/codemirror/mode/javascript/javascript.js"></script>
+<script src="/codemirror/addon/selection/active-line.js"></script>
+<script src="/codemirror/addon/edit/matchbrackets.js"></script>
+<script src="/codemirror/addon/hint/javascript-hint.js"></script>
+<script src="/codemirror/addon/display/fullscreen.js"></script>
+<script type="text/javascript">
+window.onload = function () {
+  // body...
+    editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+      mode: "text/javascript", //实现Java代码高亮
+      lineNumbers: true,  //显示行号
+      theme: "monokai", //设置主题
+      lineWrapping: true, //代码折叠
+      matchBrackets: true,  //括号匹配
+      scrollbarStyle:null,
+      matchBrackets: true,
+      styleActiveLine: true
+    });
+   // editor.on('keypress', function() {
+   //     editor.showHint();  //满足自动触发自动联想功能
+   // });
+  var strs = `[[${question.questionInit}]]`;
+  editor.setValue(strs);
+
+  $("#des").append(`[[${question.description}]]`.replace(/\n/g,"<br/>"));
+
+
+  $("#run").click(function () {
+    var code = editor.getValue();
+    var id = "[[${question.id}]]";
+
+    $.ajax({
+      url:"/api/checkAnswer",
+      method:"POST",
+      data:{'code':code,'id':id},
+      success:function (data) {
+        if (data.status==0){
+          alert("程序运行检测通过");
+        }else{
+          alert("你这段代码有毛病，不行");
+        }
+      }
+    })
+
+  })
+
+
+}
+
+
+</script>
