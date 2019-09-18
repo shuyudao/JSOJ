@@ -1,6 +1,7 @@
 package com.jsoj.app.jsoj.domain;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Record implements Serializable {
 
@@ -9,6 +10,24 @@ public class Record implements Serializable {
     private User user;
     private String code;
     private int ilike;
+    private Date ctime;
+    private String runtime;
+
+    public Date getCtime() {
+        return ctime;
+    }
+
+    public void setCtime(Date ctime) {
+        this.ctime = ctime;
+    }
+
+    public String getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(String runtime) {
+        this.runtime = runtime;
+    }
 
     public Record() {
     }

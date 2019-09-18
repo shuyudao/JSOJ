@@ -18,4 +18,7 @@ public interface UserService {
     int getUserRank(int id);
 
     List<UserRank> getUserRankList();
+
+    void updateUserByUser(User user);
+
 }

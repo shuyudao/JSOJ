@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>题库列表 - JSOJ</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+    <style>
+        [v-cloak]{
+            display: none;
+        }
+        .el-col h2{
+            color: #303133!important;
+            text-align: center;
+            font-weight: 400!important;
+        }
+        .el-col p{
+            color: #606266;
+            margin: 0px;
+            text-align: center;
+        }
+        .el-pagination{
+            margin-top: 10px;
+        }
+        #item1{
+            -moz-user-select:none;
+            -webkit-user-select:none;
+            -ms-user-select:none;
+            -khtml-user-select:none;
+            user-select:none;
+        }
+        .el-dropdown-menu a{
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+
+    <el-container>
+        <el-header>
+            <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+                <el-menu-item index="1" style="font-size: 38px;color: #409EFF;font-weight: 700;margin-right: 50px;">
+                    JSOJ</el-menu-item>
+                <el-menu-item index="2">排行榜</el-menu-item>
+                <el-menu-item index="3">题库列表</el-menu-item>
+                <el-menu-item index="4">通过记录</el-menu-item>
+                <el-menu-item index="5">匹配竞赛</el-menu-item>
+            </el-menu>
+
+            <div style="position: absolute;top: 10px;right: 80px;" index="4">
+                <el-dropdown>
+                    <div class="el-dropdown-link">
+                        <el-avatar :src="user.headImg"></el-avatar>
+                    </div>
+                    <el-dropdown-menu slot="dropdown">
+                        <a href="/user"><el-dropdown-item><i class="el-icon-user"></i> {{user.niconame}}</el-dropdown-item></a>
+                        <a href="/logout"><el-dropdown-item><i class="el-icon-switch-button"></i> 退出</el-dropdown-item></a>
+                    </el-dropdown-menu>
+                </el-dropdown>
+
+            </div>
+        </el-header>
+
+        <el-main>
+
+            <el-row type="flex" justify="center" >
+                <el-col :md="14" :sm="20" :xs="24">
+
+                    <h2>题库列表</h2>
+
+                    <div style="margin-top: 30px;">
+                        <el-input
+                                placeholder="请输入题号/题名"
+                                prefix-icon="el-icon-search"
+                                v-model="searchtext" size="medium" style="width: 50%">
+                        </el-input>
+                        <el-button :loading="loading" type="primary" @click="searchQue" :icon="se_icon" size="small">{{se_text}}</el-button>
+
+                        <el-button type="primary" icon="el-icon-edit-outline" size="small" style="float: right" @click="addQuestionShowFun">贡献题目</el-button>
+                    </div>
+
+                    <el-table stripe style="width: 100%" :data="questiondata"  v-loading="pageloading">
+                        <el-table-column label="题号" width="200" prop="id">
+                        </el-table-column>
+                        <el-table-column label="标题" prop="title">
+                        </el-table-column>
+                        <el-table-column label="分数" prop="score">
+                            <template slot-scope="scope">
+                                <el-tag effect="dark" size="mini">
+                                    {{'+'+scope.row.score}}
+                                </el-tag>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="通过率" prop="allcount">
+                            <template slot-scope="scope">
+                                    {{(scope.row.allcount/100)+'%'}}
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="挑战" prop="score">
+                            <template slot-scope="scope">
+                                <el-button size="small" type="primary" plain @click="open(scope.row.id)"><i class="el-icon-s-flag"></i>挑战</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <el-pagination
+                            small
+                            layout="prev, pager, next"
+                            :total="total" @current-change="changePage" :current-page="currpage" v-show="showpa">
+                    </el-pagination>
+
+                </el-col>
+            </el-row>
+
+        </el-main>
+
+    </el-container>
+
+
+    <el-dialog title="向我们贡献题目" :visible.sync="addQuestionShow" id="item1">
+        <el-form :model="form">
+            <el-form-item label="题名" label-width="100px">
+                <el-input placeholder="输入题名" v-model="form.title" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="描述" label-width="100px">
+                <el-input
+                        type="textarea"
+                        rows="3"
+                        placeholder="请输入题目描述"
+                        v-model="form.description">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="初始化代码" label-width="100px" >
+                <el-input
+                        type="textarea"
+                        rows="4"
+                        placeholder="输入题目的空函数代码，如：
+function add(a,b){
+    //...
+}"
+                        v-model="form.questionInit">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="正确测试用例" label-width="100px" >
+                <el-input
+                        type="textarea"
+                        rows="4"
+                        placeholder="输入四个及四个以上的正确测试用例，如：
+add(1,2) = 3
+add(3,4) = 7"
+                        v-model="form.test">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="建议分数" label-width="100px">
+                <template>
+                    <el-input-number v-model="form.score" :min="1" label="建议分数"></el-input-number>
+                </template>
+            </el-form-item>
+
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="addQuestionShow = false">取 消</el-button>
+            <el-button type="primary" @click="commitQue">提交审核</el-button>
+        </div>
+    </el-dialog>
+
+</div>
+
+</body>
+</html>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+<script>
+
+    function reloadWa(that) {
+        that.pageloading = true;
+        axios.get("/api/getQuestionList?page=0&size=10").then(function (response) {
+            var data = response.data.data;
+            that.questiondata = data;
+            that.pageloading = false;
+        }).catch(function (err) {
+            console.log(err);
+            that.$message({
+                message: "获取数据异常",
+                type: 'error'
+            })
+        })
+
+        axios.get("/api/getQuestionTotal").then(function (response) {
+            var data = response.data.data;
+            that.total = data;
+
+        })
+    }
+
+    var vm = new Vue({
+        el:"#app",
+        data() {
+            return {
+                activeIndex: '3',
+                activeIndex2: '1',
+                questiondata:null,
+                total:50,
+                searchtext:"",
+                loading:false,
+                se_icon:"el-icon-search",
+                se_text:"搜索",
+                showpa:true,
+                currpage:1,
+                pageloading:true,
+                user:{},
+                addQuestionShow:false,
+                form:{
+                    title:"",
+                    description:"",
+                    questionInit:"",
+                    test:"",
+                    score:1
+                }
+            };
+        },
+        methods:{
+            handleSelect(key){
+
+                var atr = "";
+
+                switch (key) {
+                    case "1":
+                        atr="/";
+                        break;
+                    case "2":
+                        atr="/rank";
+                        break;
+                    case "3":
+                        atr="/question";
+                        break;
+                    case "4":
+                        atr="/record";
+                        break;
+                    case "5":
+                        atr="/companies";
+                        break;
+                }
+
+                window.location.href = atr;
+            },
+            changePage(pageNum){
+                var that = this;
+                that.currpage = pageNum;
+                that.pageloading = true;
+                axios.get("/api/getQuestionList?page="+(pageNum-1)+"&size=10").then(function(response){
+                    var data = response.data.data;
+                    that.questiondata = data;
+                    that.pageloading = false;
+                }).catch(function (err) {
+                    console.log(err);
+                    that.$message({
+                        message: "获取数据异常",
+                        type: 'error'
+                    })
+                })
+            },
+            searchQue(){
+                var that = this;
+                if (that.se_text=="搜索") {
+                    that.loading = true;
+                    if (that.searchtext != "") {
+                        axios.get("/api/searchQue?keyword=" + that.searchtext).then(function (response) {
+                            var data = response.data.data;
+                            that.questiondata = data;
+                            that.loading = false;
+                            that.se_text = "取消";
+                            that.showpa = false;
+                            that.se_icon = "el-icon-close";
+                        }).catch(function (err) {
+                            console.log(err);
+                            that.$message({
+                                message: "获取数据异常",
+                                type: 'error'
+                            })
+                        })
+                    }
+                }else{
+                    that.se_text = "搜索";
+                    that.se_icon = "el-icon-search";
+                    that.showpa = true;
+                    that.searchtext = "";
+                    that.currpage = 1;
+                    reloadWa(that);
+                }
+            },
+            reload(){
+                var that = this;
+                reloadWa(that);
+            },
+            open(id){
+                window.open("/code/"+id,"_blank");
+            },
+            addQuestionShowFun(){
+                this.addQuestionShow = true;
+            },
+            commitQue(){
+                this.addQuestionShow = false;
+                var data = this.form;
+                var that = this;
+                data.test = data.test.split("\n").join("&=&");
+                console.log(data);
+                axios.post("/api/commitQue",data).then(function (response) {
+                    that.$message({
+                        message: "已提交审核",
+                        type: 'success'
+                    })
+                })
+
+            }
+
+        },
+        created:function () {
+            var that = this;
+            reloadWa(that);
+            axios.get("/api/getUser").then(function (response) {
+                that.user = response.data.data;
+            })
+        }
+    })
+</script>

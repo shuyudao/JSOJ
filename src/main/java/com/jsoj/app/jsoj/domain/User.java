@@ -1,7 +1,5 @@
 package com.jsoj.app.jsoj.domain;
 
-import org.springframework.data.web.config.SpringDataJacksonModules;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,6 +13,16 @@ public class User implements Serializable {
     private int score;
     private Date regTime;
     private int status;
+    private int auRank;
+    private String headImg;
+
+    public String getHeadImg() {
+        return headImg;
+    }
+
+    public void setHeadImg(String headImg) {
+        this.headImg = headImg;
+    }
 
     public int getId() {
         return id;
@@ -70,6 +78,14 @@ public class User implements Serializable {
 
     public void setRegTime(Date regTime) {
         this.regTime = regTime;
+    }
+
+    public int getAuRank() {
+        return auRank;
+    }
+
+    public void setAuRank(int auRank) {
+        this.auRank = auRank;
     }
 
     public int getStatus() {

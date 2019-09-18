@@ -8,6 +8,15 @@ public class UserRank {
     private int score;
     private int rankNum;
     private int recordCount;
+    private String head_img;
+
+    public String getHead_img() {
+        return head_img;
+    }
+
+    public void setHead_img(String head_img) {
+        this.head_img = head_img;
+    }
 
     public int getRankNum() {
         return rankNum;

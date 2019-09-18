@@ -17,19 +17,39 @@
 	</sql>
 
 
-    <select id="getRandomQuestion" resultType="Question">
-        SELECT <include refid="Base_Column_List"/> FROM question ORDER BY RAND() LIMIT 1
+    <select id="getRandomQuestion" resultType="com.jsoj.app.jsoj.domain.Question">
+        SELECT <include refid="Base_Column_List"/> FROM question WHERE status = 0 ORDER BY RAND() LIMIT 1
     </select>
 
-    <select id="getQuestionById" resultType="Question" parameterType="String">
+    <select id="getQuestionById" resultType="com.jsoj.app.jsoj.domain.Question" parameterType="String">
         select
         <include refid="Base_Column_List"/>
         FROM question WHERE id = #{id}
     </select>
 
     <insert id="saveQuestion" parameterType="Question">
-        insert into question (id,title,description,score,test,questionInit) VALUES
-        (#{id},#{title},#{description},#{score},#{test},#{questionInit})
+        insert into question (id,title,description,score,test,questionInit,status) VALUES
+        (#{id},#{title},#{description},#{score},#{test},#{questionInit},1)
     </insert>
+
+    <select id="getQuestion" resultType="com.jsoj.app.jsoj.domain.Question">
+        select id,title,score,allcount from question WHERE status = 0 LIMIT #{start},#{size}
+    </select>
+
+    <select id="getQuestionTotal" resultType="int">
+        select count(id) from question WHERE status = 0
+    </select>
+
+    <select id="searchQuestion" resultType="com.jsoj.app.jsoj.domain.Question">
+        select id,title,score from question WHERE id = #{keyword} OR title like '%${keyword}%'
+    </select>
+
+    <update id="incrQUestionAllCount">
+        update question SET allcount = allcount+1 WHERE id = #{id}
+    </update>
+    
+    <select id="getRandomQuestionMany" resultType="com.jsoj.app.jsoj.domain.Question">
+        SELECT * FROM question ORDER BY RAND() LIMIT #{size}
+    </select>
 
 </mapper>

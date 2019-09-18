@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>匹配竞赛 - JSOJ</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+
+    <link rel="stylesheet" href="/codemirror/lib/codemirror.css">
+    <link rel="stylesheet" href="/codemirror/theme/darcula.css">
+    <link rel="stylesheet" href="/codemirror/addon/fold/foldgutter.css"/>
+    <style>
+        [v-cloak]{
+            display: none;
+        }
+
+        body{
+            background: #edf1f7;
+        }
+        html,body{
+            overflow: hidden;
+        }
+        .box-card{
+            margin-bottom: 20px;
+        }
+
+        .CodeMirror-scroll{
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        .que_title{
+            line-height: 0;
+            font-weight: 300;
+            font-size: 18px;
+            margin: 0px;
+        }
+        .que_list{
+            height: 40px;
+            line-height: 40px;
+            border-bottom: 1px solid #e6e6e6;
+            padding-left: 5px;
+            cursor: pointer;
+        }
+        .que_list p{
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+        }
+        .des_card{
+            height: 250px;
+            overflow-y: scroll;
+        }
+        .in_list{
+            height: 730px;
+            overflow-y: scroll;
+        }
+        .dialog_p p{
+            margin: 0px;
+            padding: 0px;
+            font-size: 16px;
+        }
+        .win{
+            font-weight: 300;
+            text-align: center;
+            color: #67C23A;
+            margin: 0px;
+            padding: 0px;
+        }
+        .fail{
+            font-weight: 300;
+            text-align: center;
+            color: #F56C6C;
+            margin: 0px;
+            padding: 0px;
+        }
+        .complete:before{
+            content:'<i class="el-icon-success"></i>'
+        }
+
+        .pin{
+            font-weight: 300;
+            text-align: center;
+            color: #34302f;
+            margin: 0px;
+            padding: 0px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+
+    <el-container  v-loading="getloading" element-loading-text="检查代码中...">
+
+        <el-main>
+
+            <el-row type="flex" justify="left" >
+                <el-col :md="14" :sm="20" :xs="24">
+
+                    <el-card class="box-card des_card" v-loading="loading">
+                        <div slot="header" class="clearfix">
+                            <span class="que_title">{{questiondata.title}} </span>
+                            <el-tag size="mini" effect="dark">{{'+'+questiondata.score}}</el-tag>
+                        </div>
+                        <div class="text item" v-html="questiondata.description">
+
+                        </div>
+                    </el-card>
+
+                    <textarea style="display: none" class="form-control" id="code" name="code"></textarea>
+
+                    <div style="margin-top: 20px">
+                        <el-button type="primary" size="small" @click="runOn"><i class="el-icon-video-play" ></i> 提交运行</el-button>
+                    </div>
+
+                </el-col>
+
+                <el-col :md="10" :sm="4" style="margin-left: 20px;">
+
+                    <el-card class="box-card in_list" v-loading="loading">
+
+                        <div slot="header" class="clearfix">
+                            比赛进程
+                        </div>
+                        <p>{{userOne.niconame}} <el-progress :percentage="percentageOne"></el-progress>
+                        </p>
+                        <p>{{userTwo.niconame}} <el-progress :percentage="percentageTwo"></el-progress>
+                        </p>
+
+                        <p style="padding-top: 20px">题目列表</p>
+                        <div>
+
+                            <div class="que_list" v-for="(que,index) in questionList">
+                                <div @click="change(index)" class="que_list">
+                                    {{que.title}}  <el-tag size="mini" effect="dark">{{'+'+que.score}}</el-tag>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </el-card>
+
+                </el-col>
+
+            </el-row>
+
+        </el-main>
+
+    </el-container>
+    <el-dialog
+            title="比赛结束"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose">
+        <div class="dialog_p">
+            <h1 class="win" v-if="isWin==1">你赢了</h1>
+            <h1 class="fail" v-if="isWin==0">你败了</h1>
+            <h1 class="pin" v-if="isWin==2">平局</h1>
+            <p>{{userOne.niconame}}：{{userOne.score}}分</p>
+            <p>{{userTwo.niconame}}：{{userTwo.score}}分</p>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="back">确 定</el-button>
+        </span>
+    </el-dialog>
+
+</div>
+
+</body>
+</html>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+<script src="/codemirror/lib/codemirror.js"></script>
+<script src="/codemirror/mode/javascript/javascript.js"></script>
+<script src="/codemirror/addon/fold/foldcode.js"></script>
+<script src="/codemirror/addon/fold/foldgutter.js"></script>
+<script src="/codemirror/addon/fold/brace-fold.js"></script>
+<script src="/codemirror/addon/fold/comment-fold.js"></script>
+
+<script>
+
+    var editor;
+
+    function editor(questionInit) {
+        editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            mode: "text/javascript",
+            lineNumbers: true,  //显示行号
+            theme: "darcula", //设置主题
+            lineWrapping: true, //代码折叠
+            matchBrackets: true,  //括号匹配
+            scrollbarStyle:null,
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+            styleActiveLine: true
+        });
+        editor.setSize('100%', '400px');
+        editor.setValue(questionInit);
+    }
+
+    //检查赛程状态
+    function checkStatus(id,that) {
+        if (that.status) {
+            axios.get("/api/Competition/checkStatus/" + id).then(function (res) {
+                var data = res.data;
+                if (data.msg==null){
+                    that.percentageOne = (data.data[that.userOne.username].length / 10) * 100;
+                    that.percentageTwo = (data.data[that.userTwo.username].length / 10) * 100;
+                }else{
+                    var userOne = data.data[that.userOne.username];
+                    var userTwo = data.data[that.userTwo.username];
+                    that.userOne = userOne;
+                    that.userTwo = userTwo;
+                    var winusername = userOne.score>userTwo.score?userOne.username:userTwo.username;
+
+                    if (winusername==that.user.username){
+                        that.isWin = 1;
+                    }
+
+                    if (userOne.score == userTwo.score){
+                        that.isWin = 2;
+                    }
+
+
+                    that.dialogVisible = true;
+                    that.status = false;
+                }
+
+            })
+        }
+    }
+
+    var vm = new Vue({
+        el:"#app",
+        data() {
+            return {
+                loading:true,
+                questiondata:{},
+                questionList:{},
+                userOne:{},
+                userTwo:{},
+                comId:"",
+                code:"",
+                percentageOne:0,
+                percentageTwo:0,
+                dialogVisible:false,
+                status:true,
+                user:{}, //当前用户
+                isWin:0,
+                getloading:false
+            };
+        },
+        methods:{
+            handleSelect(key){
+
+                var atr = "";
+
+                switch (key) {
+                    case "1":
+                        atr="/";
+                        break;
+                    case "2":
+                        atr="/rank";
+                        break;
+                    case "3":
+                        atr="/question";
+                        break;
+                    case "4":
+                        atr="/record";
+                        break;
+                    case "5-1":
+                        atr="pipei";
+                        break;
+                    case "5-2":
+                        atr="solo";
+                        break;
+                }
+
+                window.location.href = atr;
+            },
+            runOn(){
+                var that = this;
+                that.getloading = true;
+                axios.post("/api/Competition/checkAnswer",{
+                    id:that.comId,
+                    queid:that.questiondata.id,
+                    code:editor.getValue()
+                }).then(function (response) {
+
+                    var data = response.data;
+                    that.getloading = false;
+                    if (data.status==1&&data.msg=="未通过"){
+                        that.$message({
+                            message: "提交未通过！",
+                            type: 'error'
+                        })
+                    }else if (data.status==1&&data.msg.indexOf("重复提交")>0){
+                        that.$message({
+                            message: "禁止重复提交本题",
+                            type: 'error'
+                        })
+                    }else if (data.status==0) {
+                        that.$message({
+                            message: "通过提交，请开始下一题",
+                            type: 'success'
+                        })
+                    }
+
+                }).catch(function (err) {
+                    console.log(">>>>> "+err);
+                    that.$message({
+                        message: "获取数据异常",
+                        type: 'error'
+                    })
+                    that.getloading = false;
+                })
+            },
+            change(que_index){
+                this.questiondata.questionInit = editor.getValue();
+                this.questiondata = this.questionList[que_index];
+                editor.setValue(this.questiondata.questionInit)
+            },
+            handleClose() {
+               this.dialogVisible = false;
+            },
+            back(){
+                window.location.href = "/companies";
+            }
+        },
+        created:function () {
+            var that = this;
+            var uri = window.location.href.split("/");
+            var comid = uri[uri.length-1];
+            axios.get("/api/Competition/get/"+comid).then(function (response) {
+                var data = response.data.data;
+                that.questionList = data.questions;
+                that.questiondata = that.questionList[0];
+                that.loading = false;
+                that.userOne = data.userOne;
+                that.userTwo = data.userTwo;
+                that.comId = comid;
+                editor(that.questiondata.questionInit);
+
+            }).catch(function (err) {
+                console.log(err);
+                that.$message({
+                    message: "获取数据异常",
+                    type: 'error'
+                })
+            });
+
+            axios.get("/api/getUser").then(function (res) {
+                that.user = res.data.data;
+            })
+
+            setInterval(function () {
+                checkStatus(that.comId,that);
+            },3000)
+        }
+
+    })
+
+
+
+</script>

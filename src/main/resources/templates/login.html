@@ -1,56 +1,176 @@
-<html><head>
-    <meta charset="utf-8">
-    <title>后台登录</title>
-    <meta name="author" content="DeathGhost">
-    <link rel="stylesheet" type="text/css" href="https://www.17sucai.com/preview/2/2016-07-26/jQuery-VerificationCode/css/style.css" tppabs="css/style.css">
+<!doctype html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>登录 - JSOJ</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
     <style>
-        body{height:100%;background:#303133;overflow:hidden;}
-        canvas{z-index:-1;position:absolute;}
-        .admin_login dd .login_txtbx{
-            height: 100%;
-            width: 100%;
+        [v-cloak]{
+            display: none!important;
         }
-        .admin_login{
-            box-shadow: none;
+        #loginbox{
+            text-align: center;
+        }
+        #loginbox input{
+            margin-bottom: 20px;
+        }
+        .el-row{
+            margin-top: 30px;
+        }
+        .el-input__icon{
+            height: 0%;
+        }
+        *{
+            border-color: #E4E7ED!important;
         }
     </style>
-    <script src="https://www.17sucai.com/preview/2/2016-07-26/jQuery-VerificationCode/js/jquery.js"></script>
-    <script src="https://www.17sucai.com/preview/2/2016-07-26/jQuery-VerificationCode/js/verificationNumbers.js" tppabs="js/verificationNumbers.js"></script>
-    <script src="https://www.17sucai.com/preview/2/2016-07-26/jQuery-VerificationCode/js/Particleground.js" tppabs="js/Particleground.js"></script>
-    <script>
-        $(document).ready(function() {
-            //粒子背景特效
-            $('body').particleground({
-                dotColor: '#5cbdaa',
-                lineColor: '#5cbdaa'
-            });
-
-        });
-    </script>
 </head>
-<body><canvas class="pg-canvas" width="622" height="792"></canvas>
-<dl class="admin_login">
-    <dt>
-        <strong>登录用户</strong>
-        <em>Management System</em>
-    </dt>
-    <form method="post" action="/api/auLogin">
-        <dd class="user_icon">
-            <input type="text" name="username" placeholder="账号" class="login_txtbx">
-        </dd>
-        <dd class="pwd_icon">
-            <input type="password" name="password" placeholder="密码" class="login_txtbx">
-        </dd>
-        <dd>
-            <input type="submit" value="立即登陆" class="submit_btn">
-        </dd>
-    </form>
-    <dd>
-        <a href="/reg" style="text-align: center;text-decoration: underline">+ 注册一个新用户</a>
-        <p>© 2019 JSOJ 术与道 版权所有</p>
-        <p>JSOJ</p>
-    </dd>
-</dl>
+<body>
+
+    <div id="app" v-cloak>
+
+        <h2 style="text-align: center;font-size: 52px;line-height: 50px;font-weight: 200;margin-bottom: 10px">JSOJ</h2>
+        <p style="color: #606266;text-align: center">JavaScript Online Judgement System</p>
+        <el-row id="loginbox" type="flex" justify="center" :gutter="10">
+            <el-col :xs="24" :span="8">
+                <el-main>
+                    <el-tabs v-model="activeName" @tab-click="handleClick">
+                        <el-tab-pane label="登录" name="login">
+                            <el-card class="box-card" shadow="always">
+                                <div>
+                                    <h2>登 录</h2>
+                                    <el-input v-model="username" placeholder="账号"></el-input>
+                                    <el-input v-model="password" show-password placeholder="密码"></el-input>
+                                    <el-button type="primary" @click="login" plain>马上登录</el-button>
+                                </div>
+                            </el-card>
+                        </el-tab-pane>
+
+                        <el-tab-pane label="注册" name="reg">
+                            <el-card class="box-card" shadow="always">
+                                <div>
+                                    <h2>注 册</h2>
+                                    <el-input v-model="regusername" placeholder="账号"></el-input>
+                                    <el-input v-model="regpassword" show-password placeholder="密码"></el-input>
+                                    <el-input v-model="niconame" placeholder="昵称"></el-input>
+                                    <el-input v-model="email" placeholder="邮箱"></el-input>
+                                   <el-row style="margin: 0px;">
+                                       <el-col :span="16">
+                                           <el-input v-model="yan" placeholder="输入右侧验证码"></el-input>
+                                       </el-col>
+                                       <el-col :span="6">
+                                           <img @click="chengYan" style="height:40px;width: 100px" :src="yansrc">
+                                       </el-col>
+                                   </el-row>
+                                    <el-button type="primary" @click="reg">立即注册</el-button>
+                                </div>
+                            </el-card>
+                        </el-tab-pane>
+                    </el-tabs>
 
 
-</body></html>
+                </el-main>
+            </el-col>
+        </el-row>
+
+    </div>
+
+</body>
+</html>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el:"#app",
+        data: {
+            activeIndex: '1',
+            activeIndex2: '1',
+            username:"",
+            password:"",
+            activeName:"login",
+            niconame:"",
+            email:"",
+            yan:"",
+            regusername:"",
+            regpassword:"",
+            yansrc:"/api/getRegYan?ran="+Math.random()
+        },
+        methods: {
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            login(){
+                var that = this;
+                axios.post(
+                    './api/auLogin',
+                    {
+                        'username':this.username,
+                        'password':this.password
+                    }
+                ).then(
+                    function (response) {
+                        var data = response.data;
+                        if (data.status!=0){
+                            that.$message({
+                                message: data.msg,
+                                type: 'error'
+                            })
+                        }else{
+                            window.location.href="/";
+                        }
+
+                    }
+                ).catch(
+                    function (error) {
+                        that.$message({
+                            message: "提交异常",
+                            type: 'error'
+                        })
+                        console.log(error);
+                    }
+                )
+            },
+            reg(){
+                var that = this;
+                axios.post(
+                    '/api/reg?yan='+that.yan,
+                    {
+                        'username':this.regusername,
+                        'password':this.regpassword,
+                        'niconame':this.niconame,
+                        'email':this.email,
+                        'yan':this.yan
+                    }
+                ).then(
+                    function (response) {
+                        var data = response.data;
+                        if (data.status!=0){
+                            that.$message({
+                                message: data.msg,
+                                type: 'error'
+                            })
+                        }else{
+                            window.location.href="/";
+                        }
+
+                    }
+                ).catch(
+                    function (error) {
+                        that.$message({
+                            message: "提交异常",
+                            type: 'error'
+                        })
+                        console.log(error);
+                    }
+                )
+            },
+            chengYan(){
+                this.yansrc = "/api/getRegYan?ran="+Math.random();
+            }
+        }
+    })
+</script>

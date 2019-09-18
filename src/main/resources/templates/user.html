@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.17.1/themes/prism-tomorrow.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.15.0/plugins/line-numbers/prism-line-numbers.css">
+    <style type="text/css">
+        [v-cloak]{
+            display: none;
+        }
+        html,body{
+            height: 100%;
+            overflow: hidden;
+        }
+        .cover{
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 100%;
+            position: absolute;
+            z-index: 99;
+        }
+        .ch{
+            opacity: 0;
+        }
+        .ch:hover{
+            opacity: .4!important;
+        }
+
+        .spanli{
+            font-size: 30px;
+            color: #909399;
+            position: relative;
+            top: -6px;
+        }
+        .lsa{
+            font-size: 40px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        #tip .lsa{
+            font-size: 18px;
+
+        }
+        #tip{
+            text-align: center;
+        }
+        .el-table__expanded-cell{
+            padding: 0px!important;
+        }
+        *::-webkit-scrollbar {
+            /*隐藏滚轮*/
+            display: none;
+        }
+        .el-dropdown-menu a{
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <el-container v-if="user!=null">
+
+        <el-header style="position: relative;">
+
+            <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+                <el-menu-item index="1" style="font-size: 38px;color: #409EFF;font-weight: 700;margin-right: 50px;">JSOJ</el-menu-item>
+                <el-menu-item index="2">排行榜</el-menu-item>
+                <el-menu-item index="3">题库列表</el-menu-item>
+                <el-menu-item index="4">通过记录</el-menu-item>
+                <el-menu-item index="5">匹配竞赛</el-menu-item>
+            </el-menu>
+
+            <div style="position: absolute;top: 5px;right: 80px;" index="4">
+                <el-dropdown>
+                    <div class="el-dropdown-link">
+                        <el-avatar :src="user.headImg"></el-avatar>
+                    </div>
+                    <el-dropdown-menu slot="dropdown">
+                        <a href="/user"><el-dropdown-item><i class="el-icon-user"></i> {{user.niconame}}</el-dropdown-item></a>
+                        <a href="/logout"><el-dropdown-item><i class="el-icon-switch-button"></i> 退出</el-dropdown-item></a>
+                    </el-dropdown-menu>
+                </el-dropdown>
+
+            </div>
+
+        </el-header>
+
+        <el-main>
+
+            <el-row type="flex" justify="center" style="margin-top: 20px;">
+                <el-col :span="10">
+                    <el-tabs type="border-card">
+                        <el-tab-pane label="个人信息">
+                            <el-form ref="form" label-width="80px">
+                                <el-form-item label="头像">
+                                    <div class="block" style="width: 80px;height: 80px;position: relative" >
+                                        <div class="cover ch">
+                                            <input type="file" @change="upload" ref="file" style="position: absolute;display: inline-block;width: 80px;height: 80px;z-index: 9999;opacity: 0;outline: none">
+                                            <i class="el-icon-upload" style="position: absolute;top: 20px;left: 24px;font-size: 32px;color: #fff;opacity: 1"></i>
+                                        </div>
+
+                                        <el-avatar style="width: 80px;height: 80px;" :src="user.headImg"></el-avatar>
+                                    </div>
+                                </el-form-item>
+                                <el-form-item label="账号">
+                                    <el-input v-model="user.username" :disabled="true"></el-input>
+                                </el-form-item>
+                                <el-form-item label="昵称">
+                                    <el-input v-model="user.niconame"></el-input>
+                                </el-form-item>
+                                <el-form-item label="邮箱">
+                                    <el-input v-model="user.email"></el-input>
+                                </el-form-item>
+                                <el-form-item label="密码">
+                                    <el-input v-model="user.password" placeholder="输入新密码重置" show-password></el-input>
+                                </el-form-item>
+
+                            </el-form>
+                            <el-button type="primary" style="float: right" @click="update">保存信息</el-button>
+                        </el-tab-pane>
+                    </el-tabs>
+                </el-col>
+                <el-col :span="8" style="margin-left: 40px;">
+                    <el-tabs type="border-card" style="margin-bottom: 20px;">
+                        <el-tab-pane label="我的成绩">
+                            <p style="text-align: center;"><span class="lsa">{{score}}</span><span class="spanli">/</span><span class="lsa" >{{rank}}</span><span class="spanli">/</span><span class="lsa" >{{record}}</span></p>
+                            <p id="tip"><span class="lsa">分数</span><span class="lsa">排名</span><span class="lsa">通过</span></p>
+                        </el-tab-pane>
+                    </el-tabs>
+                    <el-tabs type="border-card">
+                        <el-tab-pane label="提交记录">
+
+                            <el-table class="infinite-list"  @expand-change="excol" :data="recordData" stripe style="width: 100%;overflow-y: scroll;height: 350px;" >
+
+                                <!--展开内容内部组件-->
+                                <el-table-column type="expand">
+                                    <template slot-scope="props">
+
+                                        <div class="exCode">
+                                            <pre class="line-numbers language-javascript"><code class="">{{props.row.code}}</code></pre>
+                                        </div>
+
+                                    </template>
+                                </el-table-column>
+
+                                <!--表项-->
+
+                                <el-table-column
+                                        label="所属问题"
+                                        prop="question.title">
+                                    <template slot-scope="scope">
+                                        <el-link type="primary" @click="open(scope.row.question.id)">{{scope.row.question.title}}</el-link>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                        label="运行耗时(ms)"
+                                        prop="runtime">
+                                </el-table-column>
+                            </el-table>
+
+                            <el-pagination
+                                    small
+                                    layout="prev, pager, next"
+                                    :total="total"  @current-change="changePage" :current-page="currpage">
+                            </el-pagination>
+
+                        </el-tab-pane>
+                    </el-tabs>
+                </el-col>
+            </el-row>
+        </el-main>
+
+    </el-container>
+</div>
+</body>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.17.1/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.17.1/plugins/autoloader/prism-autoloader.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.17.1/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<script>
+
+    function reloadWa(that) {
+        that.pageloading = true;
+        axios.get("/api/getRecord?page=0&size=10").then(function (response) {
+            var data = response.data.data;
+            that.recordData = data;
+        }).catch(function (err) {
+            console.log(err);
+            that.$message({
+                message: "获取数据异常",
+                type: 'error'
+            })
+        })
+
+        axios.get("/api/getRecordTotal").then(function (response) {
+            var data = response.data.data;
+            that.total = data;
+
+        })
+    }
+
+    var vm = new Vue({
+        el:"#app",
+        data:{
+            activeIndex: '1',
+            user:{},
+            recordData:[],
+            expands:false,
+            currpage:1,
+            total:10,
+            rank:0,
+            record:0,
+            score:0
+        },
+        methods: {
+            handleSelect(key){
+
+                var atr = "";
+
+                switch (key) {
+                    case "1":
+                        atr="/";
+                        break;
+                    case "2":
+                        atr="/rank";
+                        break;
+                    case "3":
+                        atr="/question";
+                        break;
+                    case "4":
+                        atr="/record";
+                        break;
+                    case "5":
+                        atr="/companies";
+                        break;
+                }
+
+                window.location.href = atr;
+            },
+            openQue(){
+                window.location.href = "/code/"+this.question.id;
+            },
+            excol(){
+                //修改值供watch监听变化
+                if (!this.expands){
+                    this.expands = true;
+                }else{
+                    this.expands = false;
+                }
+            },
+            open(id){
+                window.open("/code/"+id,"_blank");
+            },
+            reload(){
+                var that = this;
+                reloadWa(that);
+            },
+            changePage(pageNum){
+                var that = this;
+                that.currpage = pageNum;
+                that.pageloading = true;
+                axios.get("/api/getRecord?page="+(pageNum-1)+"&size=10").then(function(response){
+                    var data = response.data.data;
+                    that.recordData = data;
+                    that.pageloading = false;
+                }).catch(function (err) {
+                    console.log(err);
+                    that.$message({
+                        message: "获取数据异常",
+                        type: 'error'
+                    })
+                })
+            },
+            update(){
+                var that = this;
+                axios.post("/api/updateUser",that.user).then(function (res) {
+                    that.$message({
+                        message: "更新信息成功",
+                        type: 'success'
+                    })
+                })
+            },
+            upload(){
+                var that = this;
+                let formData=new FormData();
+                formData.append('file',this.$refs.file.files[0])
+                axios.post("/api/uploadHeadImg",formData,{
+                    'Content-Type':'multipart/form-data'
+                }).then(function (res) {
+                    if (res.data.data!=null||res.data.data!=''){
+                        that.user.headImg = res.data.data;
+                        if (res.data.status==1){
+                            that.$message({
+                                message: res.data.msg,
+                                type: 'error'
+                            })
+                        }else{
+                            that.$message({
+                                message: "头像上传成功",
+                                type: 'success'
+                            })
+                        }
+
+                    }
+
+                })
+            }
+        },
+        created:function(){
+            reloadWa(this);
+            var that = this;
+            axios.get("/api/getIndexInfo").then(function (response) {
+                var data = response.data.data;
+                that.rank = data.rank;
+                that.record = data.record;
+                that.score = data.user.score;
+                that.user = data.user;
+            })
+        },
+        watch:{
+            expands:function(){
+                this.$nextTick(function(){
+                    Prism.highlightAll();
+                });
+            }
+        }});
+
+</script>
+</html>

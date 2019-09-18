@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jsoj.app.jsoj.dao.CompetitionDao">
+
+    <resultMap id="BaseResultMap" type="com.jsoj.app.jsoj.domain.Competition">
+        <result column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="question" property="question" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="type" property="type" />
+        <result column="des" property="des" />
+    </resultMap>
+
+    <insert id="saveCompetition" parameterType="com.jsoj.app.jsoj.domain.Competition" useGeneratedKeys="true" keyProperty="id">
+        insert into competition (title,question,start_time,end_time,`type`,des) VALUES
+        (#{title},#{question},#{startTime},#{endTime},#{type},#{des})
+    </insert>
+
+
+    <select id="getCompetition" parameterType="int" resultType="com.jsoj.app.jsoj.vo.Compedetail">
+        SELECT
+            question,
+            start_time AS startTime,
+            end_time AS endTime,
+            compercord.user_id,
+            compercord.score,
+            `user`.niconame
+        FROM
+            competition
+            JOIN compercord ON compercord.competition_id = competition.id
+            JOIN USER ON compercord.user_id = USER.id
+        WHERE
+            competition.id = #{id}
+    </select>
+
+</mapper>

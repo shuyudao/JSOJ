@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jsoj.app.jsoj.dao.CompercordDao">
+
+    <resultMap id="BaseResultMap" type="com.jsoj.app.jsoj.domain.Compercord">
+        <result column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="competition_id" property="competitionId" />
+        <result column="score" property="score" />
+        <result column="ctime" property="ctime" />
+    </resultMap>
+
+    <insert id="saveCompercord" parameterType="com.jsoj.app.jsoj.domain.Compercord" useGeneratedKeys="true" keyProperty="id">
+        insert into compercord (user_id,competition_id,score,ctime) VALUES
+        (#{userId},#{competitionId},#{score},#{ctime})
+    </insert>
+
+    <select id="getMyrecord" parameterType="int" resultType="com.jsoj.app.jsoj.vo.ComperInfo">
+        select compercord.id,user_id as userId,competition_id as competitionId,compercord.score,ctime,head_img,user.niconame as niconame
+        from compercord
+        JOIN competition ON compercord.competition_id = competition.id JOIN user ON compercord.user_id = user.id WHERE
+         compercord.competition_id in (select competition_id from compercord WHERE user_id = #{id}) ORDER BY competition_id DESC
+    </select>
+
+
+
+</mapper>

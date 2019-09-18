@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+	<link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+  	<style type="text/css">
+  	[v-cloak]{
+	    display: none;
+	}
+
+	.jsoj-card{
+		width: 28%;
+		float: left;
+		height: 150px;
+		margin-left: 4.5%;
+		border:1px solid #ccc;
+		border-radius: 6px;
+		text-align: center;
+	}
+	.jsoj-card h2{
+		font-size: 20px;
+		line-height: 30px;
+		color: #606266;
+
+	}
+	.jsoj-card p{
+		font-size: 46px;
+		line-height: 0px;
+		color: #303133
+	}
+	#app .el-card__body{
+		overflow: hidden;
+	}
+	#month-info{
+		margin-bottom: 10px;
+	}
+	.duan{
+		margin-left: 10px;
+	}
+	hr{
+		height: 0px;
+		border:none;
+		border-bottom: 1px solid #cececf!important;
+	}
+	#randomQuestion{
+		width: 94%;
+		position: relative;
+	}
+	#randomQuestion p{
+		font-size: 18px;
+		font-weight: 600;
+		color: #303133;
+		margin:0px;
+	}
+	#des{
+		color: #606266;
+	}
+	#battleQuestion{
+		position: absolute;
+		right: 10px;
+		top: 0px;
+	}
+
+	#questionTitle span{
+		font-size: 14px;
+	}
+	#commitInfo,#myStatus{
+		width: 75%;margin: 0 auto;overflow: hidden;box-sizing: border-box;
+	}
+	#myStatus{
+		padding-left: 3.5%;
+	}
+	#commitInfo ul{
+		padding: 0px;
+	}
+	#commitInfo li{
+		list-style: none;
+		height: auto;
+		line-height: 50px;
+		width: 100%;
+		border-bottom: 1px solid #cececf!important;
+	}
+	#commitInfo li p{
+		margin: 0px;
+	}
+	#commitInfo pre{
+		line-height: 1.8;
+	    font-family: Menlo,Monaco,Consolas,Courier,monospace;
+	    font-size: 12px;
+	    padding: 18px 24px;
+	    background-color: #fafafa;
+	    border: 1px solid #eaeefb;
+	    margin-bottom: 25px;
+	    border-radius: 4px;
+	}
+	#commitInfo pre code{
+		font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif!important;
+
+	}
+	.el-menu-item a{
+		text-decoration: none;
+	}
+	  .el-dropdown-menu a{
+		  text-decoration: none;
+	  }
+  </style>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <el-container v-if="user!=null">
+
+	  <el-header style="position: relative;">
+	  	
+	  	<el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+		  <el-menu-item index="1" style="font-size: 38px;color: #409EFF;font-weight: 700;margin-right: 50px;">JSOJ</el-menu-item>
+		  <el-menu-item index="2">排行榜</el-menu-item>
+		  <el-menu-item index="3">题库列表</el-menu-item>
+		  <el-menu-item index="4">通过记录</el-menu-item>
+		  <el-menu-item index="5">匹配竞赛</el-menu-item>
+		</el-menu>
+		
+		<div style="position: absolute;top: 5px;right: 80px;" index="4">
+		  	<el-dropdown>
+				<div class="el-dropdown-link">
+	      			<el-avatar :src="user.headImg"></el-avatar>
+	    		</div>
+	    		<el-dropdown-menu slot="dropdown">
+					<a href="/user"><el-dropdown-item><i class="el-icon-user"></i> {{user.niconame}}</el-dropdown-item></a>
+					<a href="/logout"><el-dropdown-item><i class="el-icon-switch-button"></i> 退出</el-dropdown-item></a>
+				</el-dropdown-menu>
+		  	</el-dropdown>
+		  		
+		</div>
+
+	  </el-header>
+
+	  <el-main>
+
+	  	<el-row>
+		  <el-col :span="24">
+		  	<el-alert title="9月月赛通知" show-icon type="success" description="这是一条月赛通知，告诉你个哈批，9月18日晚上8:00，第四次月赛开始" style="width: 75%;margin: 0 auto;margin-bottom: 20px;"></el-alert>
+		  	<div class="grid-content bg-purple-dark">
+		  		<el-card shadow="never" id="myStatus">
+
+		  			<div>
+		  				<p style="text-align: center;font-size: 22px;line-height: 0px;padding-right:6.5%">- 本月状态 -</p>
+		  			</div>
+
+		  			<div id="month-info">
+		  				<el-link icon="el-icon-user" href="/user">{{user.niconame}}</el-link>&nbsp;&nbsp;<span v-html="level"></span>
+		  			</div>
+		  			
+		      		<div style="overflow: hidden;">
+		      			<div class="jsoj-card" style="margin-left: 0px;">
+		      				<h2>分数</h2>
+			      			<p>{{score}}</p>
+			      		</div>
+			      		<div class="jsoj-card">
+			      			<h2>排名</h2>
+			      			<p>{{rank}}</p>
+			      		</div>
+			      		<div class="jsoj-card">
+			      			<h2>通过</h2>
+			      			<p>{{record}}</p>
+			      		</div>
+		      		</div>
+
+
+		      		<div id="randomQuestion" style="clear: both;margin-top: 50px;">
+		      			<p><span id="questionTitle"><el-tag>随机挑战：{{question.title}}</el-tag></span> <el-tag effect="dark" size="small" class="duan">+{{question.score}}</el-tag></p><el-button size="small" id="battleQuestion" type="primary" @click="openQue"><i class="el-icon-s-flag"></i> 开启挑战</el-button>
+		      			<hr>
+		      			<div id="des">
+							{{question.description}}
+		      			</div>
+		      		</div>
+
+		    	</el-card>
+
+		    	<!-- <h2 style="text-align: center;font-weight: 200">网友提交</h2> -->
+		    	<!-- <p align="center" style="margin-top: 20px;font-size: 1.4em">- 全站动态 -</p>
+		    	<p style="color: #909399;text-align: center;font-size: 12px;line-height: 0px;">显示最新50条</p>
+
+		    	<div id="commitInfo">
+		    		<ul>
+		    			<li>
+		    				<p><el-link :underline="false">弱鸡菜逼</el-link> 通过了 <el-link :underline="false" type="success">《无敌大魔王遇到了X+1=根号3问题》</el-link></p>
+		    			</li>
+		    			<li>
+		    				<p><el-link :underline="false">弱鸡菜逼</el-link> 排名上升至全站 <el-link :underline="false" type="danger">12</el-link></p>
+		    			</li>
+		    		</ul>
+		    	</div> -->
+		  	</div>
+		  </el-col>
+		</el-row>
+	  </el-main>
+
+	</el-container>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+  	<script>
+
+	    var Main = {
+		    data() {
+		      return {
+		        activeIndex: '1',
+                activeIndex2: '1',
+                user:{},
+                rank:"",
+                record:"",
+                score:"",
+				question:{},
+				level:""
+		      };
+		    },
+		    methods: {
+				handleSelect(key){
+
+					var atr = "";
+
+					switch (key) {
+						case "1":
+							atr="/";
+							break;
+						case "2":
+							atr="/rank";
+							break;
+						case "3":
+							atr="/question";
+							break;
+						case "4":
+							atr="/record";
+							break;
+						case "5":
+							atr="/companies";
+							break;
+					}
+
+					window.location.href = atr;
+				},
+				openQue(){
+					window.location.href = "/code/"+this.question.id;
+				}
+		    },
+			created:function(){
+		    	var that = this;
+                axios.get('/api/getIndexInfo').then(function (response) {
+					var data = response.data.data;
+					that.rank = data.rank;
+					that.record = data.record;
+					that.score = data.user.score;
+					that.user = data.user;
+					that.question = data.question;
+
+					var score = data.user.score;
+
+					var duan = "";
+					if (score < 100){
+						duan = `<span class="el-tag el-tag--mini el-tag--info el-tag--dark"><i class="el-icon-medal
+"></i> 青铜</span>`;
+					}else if (100 <= score && score <200){
+						duan = `<span class="el-tag el-tag--mini el-tag--success el-tag--dark"><i class="el-icon-medal
+"></i> 白银</span>`;
+					}else if (200 <= score && score <300){
+						duan = `<span class="el-tag el-tag--mini el-tag--warning el-tag--dark"><i class="el-icon-medal
+"></i> 黄金</span>`;
+					}else if (300 <= score && score <500) {
+						duan = `<span class="el-tag el-tag--mini style="background:#ddd;color:#1b1b1b" el-tag--dark"><i class="el-icon-medal
+"></i> 铂金</span>`;
+					}else if (500 <= score && score <700) {
+						duan = `<span class="el-tag el-tag--mini style="background:#9c27b0;color:#fff" el-tag--dark"><i class="el-icon-medal
+"></i> 钻石</span>`;
+					}else{
+						duan = `<span class="el-tag el-tag--mini el-tag--danger el-tag--dark"><i class="el-icon-medal
+"></i> 王者</span>`;
+					}
+					that.level = duan;
+
+				})
+            }
+		}
+		var Ctor = Vue.extend(Main)
+		new Ctor().$mount('#app')
+
+  	</script>
+</html>

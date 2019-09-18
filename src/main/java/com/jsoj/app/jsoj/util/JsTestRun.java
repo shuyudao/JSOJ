@@ -28,14 +28,14 @@ public class JsTestRun {
 
             try{
 
-                String runResult = v8.executeStringScript(code+"JSON.stringify(" + tempArr[0]+ ")");
-
+                String runResult = v8.executeStringScript(code+"JSON.stringify(" +tempArr[0]+ ")");
                 if (!runResult.equals(rightResult)){
+                    v8.release();
                     return false;
                 }
             }catch (Exception e){
-                e.printStackTrace();
                 log.error(e.getMessage());
+                v8.release();
                 return false;
             }
         }

@@ -6,6 +6,8 @@
         <id column="recordid" property="id" />
         <result column="code" property="code" />
         <result column="ilike" property="ilike" />
+        <result column="ctime" property="ctime"/>
+        <result column="runtime" property="runtime"/>
         <association property="question" javaType="Question">
             <id column="questionid" property="id"/>
             <result column="questiontitle" property="title"/>
@@ -13,25 +15,35 @@
         <association property="user" javaType="User">
             <id column="userid" property="id"/>
             <result column="userniconame" property="niconame"/>
-            <result column="userniconame" property="niconame"/>
         </association>
+
     </resultMap>
 
     <sql id="Base_Column_List">
         id,que_id,user_id,code,ilike
     </sql>
 
-    <select id="getRecordById" resultMap="BaseResultMap">
-        select record.id as recordid,record.code,record.ilike,user.id as userid,user.niconame as userniconame,question.id as questionid,question.title as questiontitle
-        from record RIGHT join user on record.user_id = user.id RIGHT JOIN question ON record.que_id = question.id
-        WHERE record.user_id =  #{id}  ORDER BY recordid DESC LIMIT 0,50
-    </select>
-
     <insert id="saveRecord" parameterType="Record">
-        insert into record (id,que_id,user_id,code,ilike) VALUES (#{id},#{question.id},#{user.id},#{code},#{ilike})
+        insert into record (id,que_id,user_id,code,ilike,ctime,runtime) VALUES (#{id},#{question.id},#{user.id},#{code},#{ilike},NOW(),#{runtime})
     </insert>
 
     <select id="getRecordCountByUserId" resultType="int">
-        select count(record.id) from record left join user ON record.user_id = user .id WHERE user.id = #{user.id}
+        select count(record.id) from record left join user ON record.user_id = user.id WHERE user.id = #{id}
+    </select>
+
+    <select id="getQuestionRecordCount" resultType="int">
+        select count(id) from record WHERE que_id = #{qid}
+    </select>
+
+    <select id="getRecordByUserId" resultMap="BaseResultMap">
+        select record.id as recordid,record.code,record.ilike,
+        user.id as userid,user.niconame as userniconame,question.id as questionid,
+        question.title as questiontitle, ctime,runtime
+        from record RIGHT join user on record.user_id = user.id RIGHT JOIN question ON record.que_id = question.id
+        WHERE record.user_id =  #{id}  ORDER BY recordid DESC LIMIT #{start},#{size}
+    </select>
+
+    <select id="getBeatQuestionRecordCount" resultType="int">
+        select count(id) from record WHERE que_id = #{que_id} AND runtime > #{runtime}
     </select>
 </mapper>

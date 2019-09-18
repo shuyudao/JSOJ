@@ -1,96 +1,282 @@
-<!doctype html>
-<html lang="ch" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="ch">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>最近的提交记录</title>
+    <title>我的提交记录 - JSOJ</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.17.1/themes/prism-tomorrow.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.15.0/plugins/line-numbers/prism-line-numbers.css">
     <style>
-        @font-face{
-            font-family: 'orggee';
-            src: url('/font/OxygenMono-Regular.ttf');
+        [v-cloak]{
+            display: none;
         }
-        *{
+        .el-col h2{
+            color: #303133!important;
+            text-align: center;
+            font-weight: 400!important;
+        }
+        .el-col p{
+            color: #606266;
             margin: 0px;
-            padding: 0px;
-            font-family: 'orggee','微软雅黑';
+            text-align: center;
+        }
+        .el-pagination{
+            margin-top: 10px;
+        }
+        .el-table__expanded-cell{
+            padding: 0px!important;
         }
         body{
-            background: #303133;
-            color:rgb(188, 205, 211);
+            overflow: overlay;
         }
-
-        #header{
-            width: 100%;
-            height: 60px;
-            background: #1f2020;
-            line-height: 40px;
-        }
-
-        #main{
-            width: 1300px;
-            min-height: 500px;
-            margin: 40px auto;
-            background-color: #1f2020;
-            padding-top: 1px;
-        }
-
-
-        #header h1{
-            font-weight: 500!important;
-        }
-        a{
-            color: rgb(188, 205, 211);
+        .el-dropdown-menu a{
             text-decoration: none;
         }
 
-        #main a{
-            text-decoration: underline;
-        }
-        pre{
-            background: #393939;
-            padding: 10px;
-            width: 90%;
-            margin: 10px auto;
-        }
-
     </style>
-</head>
+    </head>
 <body>
 
-<div id="header">
-    <h1 align="center" style="line-height: 60px;font-size: 32px!important;"><a href="/">JSOJ</a></h1>
-    <a href="/logout" style="display: block;width: 70px;height: 30px;text-align: center;line-height: 30px;background:#777777;color: #fff;position: absolute;right: 30px;top: 10px;">退出</a>
-</div>
+<div id="app" v-cloak>
 
-<h1 style="text-align: center;line-height: 70px" th:if="(${other==1})">TA的提交记录</h1>
-<h1 style="text-align: center;line-height: 70px" th:if="(${other!=1})">我的提交记录</h1>
-<p style="text-align: center;line-height: 50px;">只显示最近的50次提交记录</p>
-<div id="main">
+    <el-container>
+        <el-header>
+            <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+                <el-menu-item index="1" style="font-size: 38px;color: #409EFF;font-weight: 700;margin-right: 50px;">
+                    JSOJ</el-menu-item>
+                <el-menu-item index="2">排行榜</el-menu-item>
+                <el-menu-item index="3">题库列表</el-menu-item>
+                <el-menu-item index="4">通过记录</el-menu-item>
+                <el-menu-item index="5">匹配竞赛</el-menu-item>
+            </el-menu>
 
-    <div style="margin-top: 30px;padding: 20px;">
+            <div style="position: absolute;top: 10px;right: 80px;" index="4">
+                <el-dropdown>
+                    <div class="el-dropdown-link">
+                        <el-avatar :src="user.headImg"></el-avatar>
+                    </div>
+                    <el-dropdown-menu slot="dropdown">
+                        <a href="/user"><el-dropdown-item><i class="el-icon-user"></i> {{user.niconame}}</el-dropdown-item></a>
+                        <a href="/logout"><el-dropdown-item><i class="el-icon-switch-button"></i> 退出</el-dropdown-item></a>
+                    </el-dropdown-menu>
+                </el-dropdown>
 
-        <div th:each="temp:${recordList}">
-            <a th:href="@{'/code/'+${temp['question']['id']}}"><h2 th:text="${temp['question']['title']}">题名</h2></a>
-            <div>
-                <code>
-                    <pre th:text="${temp['code']}">
-
-                    </pre>
-                </code>
             </div>
-        </div>
+        </el-header>
 
-        <h1 style="text-align: center;line-height: 50px;color: #fff;" th:if="(${recordList.size()}<1)">
-            暂时没有提交记录
-        </h1>
+        <el-main>
 
-    </div>
+            <el-row type="flex" justify="center" >
+                <el-col :md="14" :sm="20" :xs="24">
+
+                    <h2>我的通过记录</h2>
+
+                    <el-table stripe style="width: 100%" :data="recordData"  v-loading="pageloading" @expand-change="excol" >
+
+                        <!--展开内容内部组件-->
+                        <el-table-column type="expand">
+                            <template slot-scope="props">
+
+                                <div class="exCode">
+                                    <pre class="line-numbers language-javascript"><code class="">{{props.row.code}}</code></pre>
+                                </div>
+
+                            </template>
+                        </el-table-column>
+
+                        <!--表项-->
+                        <el-table-column
+                                label="提交时间"
+                                prop="ctime" width="170">
+                        </el-table-column>
+                        <el-table-column
+                                label="所属问题"
+                                prop="question.title">
+                            <template slot-scope="scope">
+                                <el-link type="primary" @click="open(scope.row.question.id)">{{scope.row.question.title}}</el-link>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="运行耗时(ms)"
+                                prop="runtime">
+                        </el-table-column>
+                    </el-table>
+
+                    <el-pagination
+                            small
+                            layout="prev, pager, next"
+                            :total="total" @current-change="changePage" :current-page="currpage">
+                    </el-pagination>
+
+                </el-col>
+            </el-row>
+
+
+
+        </el-main>
+
+    </el-container>
 
 </div>
 
 </body>
-<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
-
 </html>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.17.1/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.17.1/plugins/autoloader/prism-autoloader.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.17.1/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<script>
+
+    function reloadWa(that) {
+        that.pageloading = true;
+        axios.get("/api/getRecord?page=0&size=10").then(function (response) {
+            var data = response.data.data;
+            that.recordData = data;
+            that.pageloading = false;
+        }).catch(function (err) {
+            console.log(err);
+            that.$message({
+                message: "获取数据异常",
+                type: 'error'
+            })
+        })
+
+        axios.get("/api/getRecordTotal").then(function (response) {
+            var data = response.data.data;
+            that.total = data;
+
+        })
+    }
+
+
+    var vm = new Vue({
+        el:"#app",
+        data() {
+            return {
+                activeIndex: '4',
+                activeIndex2: '1',
+                recordData:[],
+                total:50,
+                searchtext:"",
+                loading:false,
+                currpage:1,
+                expands:false,
+                pageloading:false,
+                user:{}
+            };
+        },
+        methods:{
+            handleSelect(key){
+
+                var atr = "";
+
+                switch (key) {
+                    case "1":
+                        atr="/";
+                        break;
+                    case "2":
+                        atr="/rank";
+                        break;
+                    case "3":
+                        atr="/question";
+                        break;
+                    case "4":
+                        atr="/record";
+                        break;
+                    case "5":
+                        atr="/companies";
+                        break;
+                }
+
+                window.location.href = atr;
+            },
+            changePage(pageNum){
+                var that = this;
+                that.currpage = pageNum;
+                that.pageloading = true;
+                axios.get("/api/getRecord?page="+(pageNum-1)+"&size=10").then(function(response){
+                    var data = response.data.data;
+                    that.recordData = data;
+                    that.pageloading = false;
+                }).catch(function (err) {
+                    console.log(err);
+                    that.$message({
+                        message: "获取数据异常",
+                        type: 'error'
+                    })
+                })
+            },
+            searchQue(){
+                var that = this;
+                if (that.se_text=="搜索") {
+                    that.loading = true;
+                    if (that.searchtext != "") {
+                        axios.get("/api/searchQue?keyword=" + that.searchtext).then(function (response) {
+                            var data = response.data.data;
+                            that.recordData = data;
+                            that.loading = false;
+                            that.se_text = "取消";
+                            that.showpa = false;
+                            that.se_icon = "el-icon-close";
+                        }).catch(function (err) {
+                            console.log(err);
+                            that.$message({
+                                message: "获取数据异常",
+                                type: 'error'
+                            })
+                        })
+                    }
+                }else{
+                    that.se_text = "搜索";
+                    that.se_icon = "el-icon-search";
+                    that.showpa = true;
+                    that.searchtext = "";
+                    that.currpage = 1;
+                    reloadWa(that);
+                }
+            },
+            reload(){
+                var that = this;
+                reloadWa(that);
+            },
+            excol(row,ex){
+                //修改值供watch监听变化
+                if (!this.expands){
+                    this.expands = true;
+                }else{
+                    this.expands = false;
+                }
+            },
+            open(id){
+                window.open("/code/"+id,"_blank");
+            }
+
+        },
+        created:function () {
+            var that = this;
+            reloadWa(that);
+            axios.get("/api/getUser").then(function (response) {
+                that.user = response.data.data;
+            })
+        },
+        watch:{
+            expands:function(){
+                this.$nextTick(function(){
+                    Prism.highlightAll();
+                });
+            }
+        }
+
+    })
+
+
+
+
+</script>

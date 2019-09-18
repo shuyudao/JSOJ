@@ -2,8 +2,6 @@ package com.jsoj.app.jsoj.dao;
 
 import com.jsoj.app.jsoj.domain.User;
 import com.jsoj.app.jsoj.vo.UserRank;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,11 +15,6 @@ public interface UserDao {
 
     int regNewUser(User user);
 
-    //更新数据 ->> 清除缓存
-    @Caching(evict = {
-            @CacheEvict(value = "User", key = "#user.id"),
-            @CacheEvict(value = "User", key = "#user.username")
-    })
     void updateUser(User user);
 
     User getUser(String username,String password);
@@ -29,4 +22,6 @@ public interface UserDao {
     int getUserRank(int id);
 
     List<UserRank> getUserRankList();
+
+    void updateUserByUser(User user);
 }

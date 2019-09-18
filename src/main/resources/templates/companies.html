@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+</head>
+<style type="text/css">
+    [v-cloak]{
+        display: none;
+    }
+    body{
+        background: #edf1f7;
+    }
+    html,body{
+        height: 100%;
+        margin: 0px;
+        padding: 0px;
+    }
+
+    #app{
+        height: 100%;
+        width: 100%;
+        background-repeat: no-repeat;
+        background-size: contain;
+    }
+    .Myimg{
+        width: 100px;
+        height: 100px;
+        overflow: hidden;
+        border-radius: 100px;
+        margin: 0 auto;
+        box-shadow:0px 0px 20px #e1e1e1
+    }
+    .Myimg img{
+        width: 100px;
+        height: 100px;
+        border-radius: 100px;
+
+    }
+    #title{
+        font-size: 36px;color: #fff;text-align: center;
+        font-weight: 400;
+        line-height: 60px;
+        color: #409EFF;
+    }
+    .spanli{
+        font-size: 30px;
+        color: #909399;
+        position: relative;
+        top: -6px;
+    }
+    .lsa{
+        font-size: 40px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    #tip .lsa{
+        font-size: 16px;
+
+    }
+    #tip{
+        text-align: center;
+    }
+    .headimg{
+        width: 40px;
+        height: 40px;
+        border-radius: 40px;
+        border:1px solid #ccc;
+    }
+    .vs{
+        width: 30px;
+        height: 30px;
+        position: relative;
+        top: -5px;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    .fenbi{
+        font-size: 22px;
+        position: relative;
+        top: -10px;
+        margin-left: 30px;
+        color: #606266;
+        width: 40px;
+        text-align: center;
+        display: inline-block;
+    }
+    .list{
+        height: 50px;
+        border-bottom: 1px solid #E4E7ED;
+        padding: 10px;
+        padding-top: 14px;
+    }
+    .fail{
+        color: rgb(245, 108, 108);
+        font-size: 20px;
+        position: relative;
+        top: -10px;
+        margin-left: 40px;
+    }
+    .win{
+        color: #67C23A;
+        font-size: 20px;
+        position: relative;
+        top: -10px;
+        margin-left: 40px;
+    }
+    .pin{
+        color: #090300;
+        font-size: 20px;
+        position: relative;
+        top: -10px;
+        margin-left: 40px;
+    }
+    .list .el-button{
+        float: right;
+        position: relative;
+        top: 10px;
+    }
+    .parName{
+        color: #99a9bf!important;
+    }
+    li{
+        list-style: none;
+    }
+</style>
+<body>
+
+<div id="app" v-cloak>
+
+    <el-container>
+        <el-main>
+            <el-row type="flex" justify="center">
+
+                <el-col>
+                    <div class="Myimg">
+                        <img :src="user.headImg">
+                    </div>
+                    <p style="line-height: 20px;text-align: center;">{{user.niconame}}</p>
+                </el-col>
+
+            </el-row>
+            <el-row type="flex" justify="center">
+
+                <el-col>
+                    <div style="text-align: center;margin-top: 10px;">
+                        <el-tooltip class="item" effect="dark" content="1V1匹配比赛" placement="top-start">
+                            <el-button type="success" @click="startO2o" :loading="loading"><i class="el-icon-aim"></i> 双人匹配</el-button>
+                        </el-tooltip>
+                    </div>
+                </el-col>
+
+            </el-row>
+
+            <el-row type="flex" justify="center">
+                <el-col :span="12" :xs="24" :sm="18" :md="12" style="margin-top: 40px;">
+                    <template>
+                        <el-tabs v-model="comLi" @tab-click="handleClick" type="border-card">
+                            <el-tab-pane label="竞赛成绩" name="first">
+                                <p style="text-align: center;line-height: 0px;color: #C0C4CC">双人匹配赛成绩</p>
+                                <p style="text-align: center;"><span class="lsa" style="color: #67C23A">{{winCount}}</span><span class="spanli">/</span><span class="lsa" style="color: #F56C6C">{{loseCount}}</span><span class="spanli">/</span><span class="lsa" style="color: #303133">{{pinCount}}</span></p>
+                                <p id="tip"><span class="lsa" style="color: #67C23A">胜</span><span class="lsa" style="color: #F56C6C">败</span><span class="lsa" style="color: #303133">平</span></p>
+                            </el-tab-pane>
+                        </el-tabs>
+                    </template>
+                </el-col>
+            </el-row>
+
+            <el-row type="flex" justify="center">
+                <el-col :span="12" :xs="24" :sm="18" :md="12" style="margin-top: 40px;">
+                    <template>
+                        <el-tabs v-model="activeName" @tab-click="handleClick" type="border-card">
+                            <el-tab-pane label="匹配记录" name="first">
+                                <div>
+                                    <div class="list" v-for="comp in compinfomation">
+                                        <a :href="'/user/'+comp.userOne.id">
+                                            <el-tooltip class="item" effect="dark" :content="comp.userOne.niconame" placement="top">
+                                                <img class="headimg" :src="comp.userOne.headImg">
+                                            </el-tooltip>
+                                        </a>
+                                        <img class="vs" src="/img/vs.png">
+                                        <a :href="'/user/'+comp.userTwo.id">
+                                            <el-tooltip class="item" effect="dark" :content="comp.userTwo.niconame" placement="top">
+                                                <img class="headimg" :src="comp.userTwo.headImg">
+                                            </el-tooltip>
+                                        </a>
+                                        <span class="fenbi">{{comp.userOne.score}} </span>
+                                        <span style="position: relative;top: -14px;">:</span>
+                                        <span class="fenbi" style="margin-left: 0px"> {{comp.userTwo.score}}</span>
+                                        <span class="fail" v-if="comp.isWin==0">败北</span>
+                                        <span class="win" v-if="comp.isWin==1">胜利</span>
+                                        <span class="pin" v-if="comp.isWin==2">平局</span>
+
+                                        <el-button type="primary" icon="el-icon-info" size="mini" @click="openDetail(comp.id)">竞赛详情</el-button>
+                                    </div>
+                                </div>
+                            </el-tab-pane>
+
+                        </el-tabs>
+                    </template>
+                </el-col>
+            </el-row>
+        </el-main>
+        <el-dialog
+                title="竞赛详情"
+                :visible.sync="dialogVisible"
+                width="30%" v-if="compdetail!=null">
+            <div>
+                <p><span class="parName">参赛对象：</span><span>{{ compdetail.detail.one.niconame }} - {{compdetail.detail.two.niconame}}</span></p>
+                <p><span class="parName">比赛分数：</span><span>{{ compdetail.detail.one.score }} - {{compdetail.detail.two.score}}</span></p>
+                <p><span class="parName">比赛时间：</span><span>{{ compdetail.detail.one.startTime }} - {{compdetail.detail.one.endTime}}</span></p>
+                <p class="parName">比赛题目：</p>
+                <ul style="position: relative;left: 24px;top: -32px;">
+                    <li v-for="temp in compdetail.question"><el-link target="_blank" style="padding-left: 5px;" type="primary" :href="'/code/'+temp.id">{{temp.title}}</el-link></li>
+                </ul>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="dialogVisible = false">关 闭</el-button>
+            </span>
+        </el-dialog>
+    </el-container>
+
+</div>
+
+
+</body>
+</html>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+<script type="text/javascript">
+
+    var vm = new Vue({
+        el:'#app',
+        data() {
+            return {
+                activeName: 'first',
+                comLi:'first',
+                loading:false,
+                compinfomation:[],
+                user:{},
+                winCount:0,
+                loseCount:0,
+                pinCount:0,
+                compdetail:null,
+                dialogVisible:false
+            }
+        },
+        methods: {
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            startO2o(){
+                var that = this;
+                this.loading = true;
+                axios.get("/api/Competition/MatchO2o").then(function (res) {
+                    var data = res.data.data;
+
+                    if (data!=null){
+                        that.$message({
+                            message: "匹配成功",
+                            type: 'success'
+                        })
+                        window.location.href = "/companiesCode/"+data
+                    }else{
+                        that.loading = false;
+                        that.$message({
+                            message: "暂时没有匹配的用户",
+                            type: 'info'
+                        })
+                    }
+
+                })
+            },
+            openDetail(id){
+                var that = this;
+                axios.get("/api/Competition/getCompdetail?id="+id).then(function (res) {
+                    that.dialogVisible = true;
+
+                    that.compdetail = res.data.data;
+
+                    that.compdetail.detail = {
+                        one:res.data.data.detail[0],
+                        two:res.data.data.detail[1]
+                    }
+                });
+            },
+            handleClose(){
+                this.dialogVisible = false;
+            }
+        },
+        created:function () {
+
+            var that = this;
+
+            axios.get("/api/getUser").then(function (res) {
+                that.user = res.data.data;
+            });
+
+            axios.get("/api/Competition/getComp").then(function (res) {
+
+                var data = res.data.data;
+
+                for(var i = 0 ; i < data.length ; i++){
+                    if(i%2==0){
+                        isWin = 0;
+                        if (that.user.id == data[i].userId&&data[i].score > data[i+1].score||that.user.id == data[i+1].userId&&data[i].score < data[i+1].score) {
+                            isWin = 1;
+                            that.winCount++;
+                        }else if (data[i].score == data[i+1].score) {
+                            isWin = 2;
+                            that.pinCount++;
+                        }else{
+                            that.loseCount++;
+                        }
+                        that.compinfomation[that.compinfomation.length] = {
+                            id:data[i].competitionId,
+                            userOne:{
+                                score:data[i].score,
+                                id:data[i].userId,
+                                headImg:data[i].head_img,
+                                niconame:data[i].niconame,
+                            },
+                            userTwo:{
+                                score:data[i+1].score,
+                                id:data[i+1].userId,
+                                headImg:data[i+1].head_img,
+                                niconame:data[i+1].niconame
+                            },
+                            isWin:isWin
+                        }
+                    }
+                }
+
+                that.$forceUpdate();
+            }).catch(function (e) {
+                console.log(e)
+            })
+
+        }
+    })
+</script>

@@ -8,13 +8,17 @@ import com.jsoj.app.jsoj.serive.UserService;
 import com.jsoj.app.jsoj.vo.UserRank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @CacheConfig(cacheNames = "UserCache")
+@Transactional
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -26,7 +30,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Cacheable(value = "User",key = "#id")
     public User getUserById(int id) {
-        return userDao.getUserById(id);
+        User user = userDao.getUserById(id);
+        user.setPassword(null);
+        return user;
     }
 
     @Override
@@ -61,6 +67,15 @@ public class UserServiceImpl implements UserService {
         return userList;
 
 
+    }
+
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = "User", key = "#user.id"),
+            @CacheEvict(value = "User", key = "#user.username")
+    })
+    public void updateUserByUser(User user) {
+        userDao.updateUserByUser(user);
     }
 
 

@@ -1,109 +1,297 @@
-<!doctype html>
-<html lang="ch" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="ch">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>首页</title>
+    <title>排行榜 - JSOJ</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
     <style>
-        @font-face{
-            font-family: 'orggee';
-            src: url('/font/OxygenMono-Regular.ttf');
+        [v-cloak]{
+            display: none;
         }
-        *{
+        .el-col h2{
+            color: #303133!important;
+            text-align: center;
+            font-weight: 400!important;
+        }
+        .el-col p{
+            color: #606266;
             margin: 0px;
-            padding: 0px;
-            font-family: 'orggee','微软雅黑';
+            text-align: center;
         }
-        body{
-            background: #303133;
-            color:rgb(188, 205, 211);
-        }
-
-        #header{
-            width: 100%;
+        .user_img,.user_img img{
+            width: 60px;
             height: 60px;
-            background: #1f2020;
-            line-height: 40px;
+            border-radius: 60px;
+            overflow: hidden;
+            margin: 0 auto;
+            box-shadow: 0 0 50px 0 rgba(0,0,0,0.15);
         }
-
-        #main{
-            width: 1300px;
-            min-height: 500px;
-            margin: 40px auto;
-            background-color: #1f2020;
-            padding-top: 1px;
+        #first{
+            margin-top: 50px;
+            position: relative;
         }
+        #first p{
+            color: #F56C6C;
+            font-size: 16px;
+        }
+        #sandt{
+            overflow: hidden;
+            margin: 0 auto;
+            width: 40%;
+            padding-top: 30px;
+        }
+        #second,#third{
+            width: 50%;
+            height: auto;
+            float: left;
+            position: relative;
 
 
-        li{
-            list-style: none;
-            height: 40px;
+        }
+        #second p,#third p{
+            font-size: 14px;
+            font-weight: 400;
+        }
+        .xun{
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            width: 30px;
+            margin-left: -15px;
+        }
+        .el-main .el-col p{
+            font-size: 12px;
+            line-height: 26px;
+            font-weight: 600;
+        }
+        #ranklist{
             width: 100%;
-            margin-bottom: 20px;
-            /*border-bottom: 1px solid #c0c0c0;*/
+            min-height: 200px;
+            box-shadow: 0 0 20px 0 rgba(0,0,0,0.15);
+            border-radius: 8px;
+            margin: 0 auto;
+            margin-top: 40px;
+            overflow: hidden;
+            clear: both;
+            padding: 20px;
+            box-sizing: border-box;
         }
-
-        #header h1{
-            font-weight: 500!important;
+        .user_rank{
+            height: 60px;
+            border-bottom: 1px solid #E4E7ED;
+            overflow: hidden;
         }
-        a{
-            color: rgb(188, 205, 211);
+        .user_rank div{
+            float: left;
+            line-height: 60px;
+            margin-top: 5px;
+        }
+        .user_rank_num{
+            line-height: 60px!important;
+            padding-right: 10px;
+            font-size: 14px;
+            margin-top: 0px!important;
+            width: 45px;
+            text-align: center;
+        }
+        .user_info_l{
+            margin-left: 10px;
+        }
+        .user_info_score{
+            line-height: 20px!important;
+        }
+        .user_rank_img,.user_rank_img img{
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+        }
+        #first .user_img{
+            border: 3px solid #ffd654;
+        }
+        #second .user_img{
+            border:3px solid #b2b2b2;
+        }
+        #third .user_img{
+            border: 3px solid #cf9400;
+        }
+        .el-menu-item a{
             text-decoration: none;
         }
-
-        li div{
-            font-size: 24px;
-            text-align: center;
-            margin: 0 auto;
+        .el-dropdown-menu a{
+            text-decoration: none;
         }
-        .rankNum{
-            font-size: 24px;
-            font-style: italic;
+        .user_rank a{
+            color: #606266;
         }
-
-        ul span{
-            width: 20%!important;
-            display: inline-block;
-        }
-
     </style>
 </head>
 <body>
 
-<div id="header">
-    <h1 align="center" style="line-height: 60px;font-size: 32px!important;"><a href="/">JSOJ</a></h1>
-    <a href="/logout" style="display: block;width: 70px;height: 30px;text-align: center;line-height: 30px;background:#777777;color: #fff;position: absolute;right: 30px;top: 10px;">退出</a>
-</div>
-<h1 style="text-align: center;line-height: 70px">全站排行榜(10)</h1>
-<div id="main">
+    <div id="app" v-cloak>
 
-    <ul style="margin-top: 30px;">
+        <el-container v-if="rankList!=null">
+            <el-header>
+                <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+                    <el-menu-item index="1" style="font-size: 38px;color: #409EFF;font-weight: 700;margin-right: 50px;">
+                        JSOJ</el-menu-item>
+                    <el-menu-item index="2">排行榜</el-menu-item>
+                    <el-menu-item index="3">题库列表</el-menu-item>
+                    <el-menu-item index="4">通过记录</el-menu-item>
+                    <el-menu-item index="5">匹配竞赛</el-menu-item>
+                </el-menu>
 
-        <li>
-            <div>
-                <span class="rankNum" style="font-style: normal">排名</span>
-                <span><a href="#">昵称</a></span>
-                <span class="score">分数</span>
-                <span class="score">提交</span>
-            </div>
-        </li>
+                <div style="position: absolute;top: 10px;right: 80px;" index="4">
+                    <el-dropdown>
+                        <div class="el-dropdown-link">
+                            <el-avatar :src="user.headImg"></el-avatar>
+                        </div>
+                        <el-dropdown-menu slot="dropdown">
+                            <a href="/user"><el-dropdown-item><i class="el-icon-user"></i> {{user.niconame}}</el-dropdown-item></a>
+                            <a href="/logout"><el-dropdown-item><i class="el-icon-switch-button"></i> 退出</el-dropdown-item></a>
+                        </el-dropdown-menu>
+                    </el-dropdown>
 
-        <li th:each="temp:${rankList}">
-            <div>
-                <span class="rankNum" th:text="${temp['rankNum']}">排名</span>
-                <span><a href="#" th:text="${temp['niconame']}">昵称</a></span>
-                <span class="score" th:text="${temp['score']}">分数</span>
-                <a th:href="@{'/record/?other='+${temp['id']}}"><span  style="text-decoration: underline" class="score" th:text="${temp['recordCount']}">提交</span></a>
-            </div>
-        </li>
+                </div>
+            </el-header>
 
-    </ul>
+            <el-main>
 
-</div>
+                <el-row type="flex" justify="center" >
+                    <el-col :sm="14">
+
+                        <h2>全球排行榜</h2>
+                        <p>每月月初重置数据</p>
+
+                        <div id="first">
+                            <div>
+                                <el-tooltip class="item" effect="dark" :content="'分数：'+rankList[0].score" placement="top">
+                                    <a :href="'/user/'+rankList[0].id">
+                                        <div class="user_img" :uid="rankList[0].id">
+                                            <img :src="rankList[0].head_img" alt="">
+                                        </div>
+                                    </a>
+                                </el-tooltip>
+                                <img class="xun" src="/img/first.png" alt="">
+                                <p>{{rankList[0].niconame}}</p>
+                            </div>
+                        </div>
+                        <div id="sandt">
+
+                            <div id="second">
+                                <el-tooltip class="item" effect="dark" :content="'分数：'+rankList[1].score" placement="top">
+                                    <a :href="'/user/'+rankList[1].id">
+                                        <div class="user_img" :uid="rankList[1].id">
+                                            <img :src="rankList[1].head_img" alt="">
+                                        </div>
+                                    </a>
+                                </el-tooltip>
+                                <img class="xun" src="/img/second.png" alt="">
+                                <p>{{rankList[1].niconame}}</p>
+                            </div>
+
+                            <div id="third">
+                                <el-tooltip class="item" effect="dark" :content="'分数：'+rankList[2].score" placement="top">
+                                    <a :href="'/user/'+rankList[2].id">
+                                        <div class="user_img" :uid="rankList[2].id">
+                                            <img :src="rankList[2].head_img" alt="">
+                                        </div>
+                                    </a>
+                                </el-tooltip>
+                                <img class="xun" src="/img/third.png" alt="">
+                                <p>{{rankList[2].niconame}}</p>
+                            </div>
+
+                        </div>
+
+                        <el-row type="flex" justify="center">
+                            <el-col :sm="18">
+                                <div id="ranklist">
+
+                                    <div class="user_rank" v-for="(temp,index) in rankList" v-if="index>2">
+                                        <a :href="'/user/'+temp.id">
+                                        <div class="user_rank_num">{{index+1}}</div>
+                                        <div class="user_rank_img" :uid="temp.id"><img :src="temp.head_img" alt=""></div>
+                                        <div class="user_info_l">
+                                            <p class="user_info_name">{{temp.niconame}}</p>
+                                            <p class="user_info_score"><span>分数：{{temp.score}}</span></p>
+                                        </div>
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </el-col>
+                        </el-row>
+                    </el-col>
+                </el-row>
+
+            </el-main>
+
+        </el-container>
+
+    </div>
 
 </body>
-<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
-
 </html>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el:"#app",
+        data() {
+            return {
+                activeIndex: '2',
+                activeIndex2: '1',
+                rankList:null,
+                user:{}
+            };
+        },
+        methods:{
+            handleSelect(key){
+
+                var atr = "";
+
+                switch (key) {
+                    case "1":
+                        atr="/";
+                        break;
+                    case "2":
+                        atr="/rank";
+                        break;
+                    case "3":
+                        atr="/question";
+                        break;
+                    case "4":
+                        atr="/record";
+                        break;
+                    case "5":
+                        atr="/companies";
+                        break;
+                }
+
+                window.location.href = atr;
+            }
+        },
+        created:function () {
+            var that = this;
+            axios.get("/api/getRankList").then(function (response) {
+                var data = response.data.data;
+                that.rankList = data.rankList;
+
+            }).catch(function (err) {
+                console.log(err);
+                that.$message({
+                    message: "获取数据异常",
+                    type: 'error'
+                })
+            })
+
+            axios.get("/api/getUser").then(function (response) {
+                that.user = response.data.data;
+            })
+        }
+    })
+</script>

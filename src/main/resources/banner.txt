@@ -8,5 +8,5 @@
  \$$    $$ \$$    $$ \$$    $$ \$$    $$
   \$$$$$$   \$$$$$$   \$$$$$$   \$$$$$$
 
-JSOJ 0.0.1 术与道
+JavaScript Online Judgement System 1.0.0 术与道
 

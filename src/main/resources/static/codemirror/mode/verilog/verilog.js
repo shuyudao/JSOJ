@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -81,7 +81,7 @@ CodeMirror.defineMode("verilog", function(config, parserConfig) {
   // Block openings which are closed by a matching keyword in the form of ("end" + keyword)
   // E.g. "task" => "endtask"
   var blockKeywords = words(
-    "case checker class clocking config function generate interface module package" +
+    "case checker class clocking config function generate interface module package " +
     "primitive program property specify sequence table task"
   );
 

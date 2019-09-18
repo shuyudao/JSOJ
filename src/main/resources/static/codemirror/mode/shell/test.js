@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/LICENSE
 
 (function() {
   var mode = CodeMirror.getMode({}, "shell");
@@ -61,4 +61,13 @@
 
   MT("nested braces",
      "[builtin echo] [def ${A[${B}]]}]")
+
+  MT("strings in parens",
+     "[def FOO][operator =]([quote $(<][string \"][def $MYDIR][string \"][quote /myfile grep ][string 'hello$'][quote )])")
+
+  MT ("string ending in dollar",
+     '[def a][operator =][string "xyz$"]; [def b][operator =][string "y"]')
+
+  MT ("quote ending in dollar",
+     "[quote $(echo a$)]")
 })();
