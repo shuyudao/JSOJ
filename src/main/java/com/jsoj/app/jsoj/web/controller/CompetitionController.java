@@ -116,7 +116,7 @@ public class CompetitionController {
         String runtime = questionService.checkAnswer(code, que_id, (User) session.getAttribute("user"));
         questionService.incrQUestionAllCount(que_id); //提交+1
 
-        if (true){ //runtime!=null
+        if (runtime!=null){ //runtime!=null
             int count = competitionGlobal.putRecord(user.getUsername(), id, que_id);
             if (count==10){
                 competitionGlobal.getCompetitionO2oRu(id).setEndTime(new Date());
